@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comentarios del tecnico</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-4">
+        <h2 class="text-center">💬 Comentarios</h2>
+
+        <!-- Sección para agregar comentario (ahora arriba) -->
+        <h3 class="mt-4">➕ Agregar Comentario</h3>
+        <form id="form-comentario">
+            <input type="hidden" id="tecnico_id">
+            <div class="mb-2">
+                <label>Tu Nombre:</label>
+                <input type="text" id="usuario" class="form-control" required>
+            </div>
+            <div class="mb-2">
+                <label>Comentario:</label>
+                <textarea id="comentario" class="form-control" required></textarea>
+            </div>
+            <div class="mb-2">
+                <label>Calificación (1-5):</label>
+                <input type="number" id="calificacion" class="form-control" min="1" max="5" step="1" required>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Enviar</button>
+                <a href="tecnicos.html" class="btn btn-secondary">⬅️ Volver</a>
+            </div>
+            <div id="mensaje-exito" class="alert alert-success d-none" role="alert"></div>
+        </form>
+
+        <!-- Lista de comentarios (ahora abajo) -->
+        <div id="comentarios-lista" class="mt-4 p-3 border rounded bg-light"></div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const params = new URLSearchParams(window.location.search);
+            const tecnicoId = params.get("tecnico_id");
+            document.getElementById("tecnico_id").value = tecnicoId;
+            cargarComentarios(tecnicoId);
+        });
+
+        function cargarComentarios(tecnicoId) {
+            fetch(`obtener_comentarios_tecnicos.php?tecnico_id=${tecnicoId}`)
+                .then(response => response.json())
+                .then(data => {
+                    let comentariosLista = document.getElementById("comentarios-lista");
+                    comentariosLista.innerHTML = "";
+                    if (data.length === 0) {
+                        comentariosLista.innerHTML = "<p class='text-muted'>No hay comentarios aún.</p>";
+                    } else {
+                        let totalCalificacion = 0;
+                        data.forEach(comentario => {
+                            totalCalificacion += parseInt(comentario.calificacion);
+                            comentariosLista.innerHTML += `
+                                <div class="border-bottom py-2">
+                                    <strong>${comentario.usuario}</strong> 
+                                    <span class="badge bg-warning">⭐ ${comentario.calificacion}</span>
+                                    <p>${comentario.comentario}</p>
+                                </div>`;
+                        });
+                        let promedio = (totalCalificacion / data.length).toFixed(1);
+                        localStorage.setItem(`calificacion-promedio-${tecnicoId}`, promedio);
+                        localStorage.setItem(`contador-comentarios-${tecnicoId}`, data.length);
+                    }
+                })
+                .catch(error => console.error("Error al obtener comentarios:", error));
+        }
+
+        document.getElementById("form-comentario").addEventListener("submit", function(event) {
+            event.preventDefault();
+            let tecnicoId = document.getElementById("tecnico_id").value;
+            let usuario = document.getElementById("usuario").value.trim();
+            let comentario = document.getElementById("comentario").value.trim();
+            let calificacion = document.getElementById("calificacion").value.trim();
+        
+            if (!usuario || !comentario || !calificacion) {
+                alert("Completa todos los campos.");
+                return;
+            }
+        
+            let formData = new FormData();
+            formData.append("tecnico_id", tecnicoId);
+            formData.append("usuario", usuario);
+            formData.append("comentario", comentario);
+            formData.append("calificacion", calificacion);
+        
+            fetch("agregar_comentario_tecnico.php", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    let mensajeExito = document.getElementById("mensaje-exito");
+                    mensajeExito.textContent = "✅ Comentario registrado exitosamente.";
+                    mensajeExito.classList.remove("d-none");
+        
+                    // Limpiar el formulario
+                    document.getElementById("usuario").value = "";
+                    document.getElementById("comentario").value = "";
+                    document.getElementById("calificacion").value = "";
+        
+                    // Recargar los comentarios sin cerrar la página
+                    cargarComentarios(tecnicoId);
+                } else {
+                    alert("Error al agregar comentario.");
+                }
+            })
+            .catch(error => console.error("Error al enviar comentario:", error));
+        });
+        document.getElementById("calificacion").addEventListener("keydown", function(event) {
+            let key = event.key;
+            if (!["1", "2", "3", "4", "5", "Backspace", "Delete", "ArrowLeft", "ArrowRight"].includes(key)) {
+                event.preventDefault();
+            }
+        });        
+        
+    </script>
+</body>
+</html>

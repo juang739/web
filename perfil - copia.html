@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👤 Perfil del Vendedor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #E2C799, #B68973, #8D7B68);
+            color: #2C2A2A;
+            text-align: center;
+            font-family: 'Arial', sans-serif;
+            padding: 20px;
+        }
+        .container {
+            margin-top: 50px;
+            padding: 25px;
+            background-color: #F5F5DC; /* Beige claro */
+            border-radius: 15px;
+            box-shadow: 4px 6px 12px rgba(0, 0, 0, 0.3);
+        }
+        .btn-back {
+            background-color: #B68973;
+            color: white;
+            padding: 12px 20px;
+            text-decoration: none;
+            border-radius: 10px;
+            display: inline-block;
+            margin-top: 20px;
+            font-weight: bold;
+            transition: background 0.3s, transform 0.2s;
+        }
+        .btn-back:hover {
+            background-color: #8D7B68;
+            transform: scale(1.1);
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #5A4F3C;
+        }
+        p {
+            font-size: 1.2rem;
+            margin: 10px 0;
+            color: #2C2A2A;
+        }
+        .highlight {
+            font-weight: bold;
+            color: #5A4F3C;
+            text-transform: uppercase; /* Convertir texto a mayúsculas */
+        }
+        
+        a {
+            color: #B68973;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        a:hover {
+            text-decoration: underline;
+            color: #8D7B68;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💵 Perfil del Vendedor 💵</h1>
+        <p><strong>🆔 Nombre:</strong> <span id="nombre" class="highlight"></span></p>
+        <p><strong>🎂 Edad:</strong> <span id="edad" class="highlight"></span></p>
+        <p><strong>📍 Ciudad:</strong> <span id="ciudad" class="highlight"></span></p>
+        <p><strong>🌐 Página Web:</strong> <a id="pagina_web" href="#" target="_blank"></a></p>
+        <p><strong>⏰ Horario de Atención:</strong> <span id="horario_venta" class="highlight"></span></p>
+        <p><strong>📞 Celular:</strong> <span id="celular" class="highlight"></span></p>
+        
+        
+        <a href="vendedor1.html" class="btn-back">⬅️ Volver al Listado</a>
+    </div>
+
+    <script>
+        function getParameterByName(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name) || "No disponible"; // Si no hay valor, se muestra "No disponible"
+        }
+        
+        // Asignar valores a los elementos HTML
+        document.getElementById("nombre").innerText = getParameterByName("nombre");
+        document.getElementById("edad").innerText = getParameterByName("edad");
+        document.getElementById("ciudad").innerText = getParameterByName("ciudad");
+        
+        // Corregir el ID de la página web
+        const webUrl = getParameterByName("pagina_web");
+        const webElement = document.getElementById("pagina_web"); // Asegurar que coincide con el HTML
+        webElement.innerText = webUrl !== "No disponible" ? webUrl : "No disponible";
+        if (webUrl && webUrl !== "No disponible") {
+            webElement.href = webUrl;
+        } else {
+            webElement.removeAttribute("href");
+        }
+        
+        // Corregir IDs incorrectos en JavaScript
+        document.getElementById("horario_venta").innerText = getParameterByName("horario_venta");
+        document.getElementById("celular").innerText = getParameterByName("celular");
+        
+    </script>
+</body>
+</html>
+
