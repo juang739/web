@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛒 Registro Comprador</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #004a99; /* Azul oscuro */
+            color: white;
+            text-align: center;
+        }
+        .container {
+            margin-top: 50px;
+            background: #004a99; /* Azul intermedio */
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.2);
+        }
+        .sticker {
+            font-size: 60px;
+            display: block;
+            margin-bottom: 20px;
+        }
+        .form-control {
+            border-radius: 10px;
+            border: none;
+            padding: 12px;
+        }
+        .btn-custom {
+            background-color: #FFD700; /* Amarillo */
+            color: #00274D; /* Azul oscuro */
+            font-weight: bold;
+            border-radius: 10px;
+            padding: 12px;
+            width: 100%;
+        }
+        .btn-custom:hover {
+            background-color: #FFC107; /* Amarillo más oscuro */
+        }
+        .btn-back {
+            background-color: #dc3545; /* Rojo */
+            color: white;
+            font-weight: bold;
+            border-radius: 10px;
+            padding: 12px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .btn-back:hover {
+            background-color: #c82333; /* Rojo más oscuro */
+        }
+        .alert-custom {
+            display: none;
+            margin-top: 15px;
+            border-radius: 10px;
+            padding: 10px;
+        }
+        .alert-danger {
+            background-color: #ff4d4d; /* Rojo más llamativo */
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <span class="sticker">🛒</span>
+        <h2>Registro Cliente Comprador</h2>
+        <form id="comprador-form">
+            <input type="text" name="nombre" class="form-control mt-2" placeholder="👤 Nombre" required>
+            <input type="number" name="cedula" class="form-control mt-2" placeholder="🆔 Cédula" maxlength="10" inputmode="numeric" required>
+            <div id="error-cedula-longitud" class="alert alert-danger alert-custom">
+                ❌ La cédula debe tener exactamente 10 dígitos.
+            </div>
+            <input type="number" name="celular" class="form-control mt-2" placeholder="📱 Celular" maxlength="10" inputmode="numeric" required>
+            <div id="error-celular-longitud" class="alert alert-danger alert-custom">
+                ❌ El celular debe tener exactamente 10 dígitos.
+            </div>
+            <input type="email" name="correo" class="form-control mt-2" placeholder="📧 Correo" required>
+            <div id="error-correo" class="alert alert-danger alert-custom">
+                ❌ El correo debe contener "@"
+            </div>
+            <button type="submit" class="btn btn-custom mt-3">✅ Registrar</button>
+        </form>
+
+        <div id="message" class="alert alert-success alert-custom">🎉 Registro exitoso</div>
+        <div id="error-cedula" class="alert alert-danger alert-custom">❌ La cédula ya está registrada.</div>
+
+        <a href="Untitled-1.html" class="btn btn-back mt-3">⬅️ Volver</a>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const compradorForm = document.getElementById("comprador-form");
+            const messageSuccess = document.getElementById("message");
+            const errorCedula = document.getElementById("error-cedula");
+            const errorCedulaLongitud = document.getElementById("error-cedula-longitud");
+            const errorCelularLongitud = document.getElementById("error-celular-longitud");
+            const errorCorreo = document.getElementById("error-correo");
+    
+            const cedulaInput = document.querySelector("input[name='cedula']");
+            const celularInput = document.querySelector("input[name='celular']");
+            const correoInput = document.querySelector("input[name='correo']");
+
+            function limitarLongitud(input, errorMensaje) {
+                input.addEventListener("input", function () {
+                    if (this.value.length > 10) {
+                        this.value = this.value.slice(0, 10);
+                    }
+                    errorMensaje.style.display = this.value.length < 10 ? "block" : "none";
+                });
+            }
+    
+            limitarLongitud(cedulaInput, errorCedulaLongitud);
+            limitarLongitud(celularInput, errorCelularLongitud);
+    
+            correoInput.addEventListener("input", function () {
+                errorCorreo.style.display = correoInput.value.includes("@") ? "none" : "block";
+            });
+
+            compradorForm.addEventListener("submit", function (event) {
+                event.preventDefault();
+
+                let cedulaValida = cedulaInput.value.length === 10;
+                let celularValido = celularInput.value.length === 10;
+
+                if (!cedulaValida || !celularValido) {
+                    errorCedulaLongitud.style.display = !cedulaValida ? "block" : "none";
+                    errorCelularLongitud.style.display = !celularValido ? "block" : "none";
+                    return;
+                }
+
+                let formData = new FormData(compradorForm);
+                formData.append("role", "comprador");
+
+                fetch("save_data.php", {
+                    method: "POST",
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        messageSuccess.style.display = "block";
+                        errorCedula.style.display = "none";
+                        compradorForm.reset();
+                        setTimeout(() => {
+                            messageSuccess.style.display = "none";
+                        }, 3000);
+                    } else {
+                        errorCedula.style.display = "block";
+                        messageSuccess.style.display = "none";
+                    }
+                })
+                .catch(error => {
+                    console.error("Error en el registro:", error);
+                    errorCedula.textContent = "❌ Ocurrió un error. Inténtalo de nuevo.";
+                    errorCedula.style.display = "block";
+                    messageSuccess.style.display = "none";
+                });
+            });
+        });
+    </script>
+</body>
+</html>

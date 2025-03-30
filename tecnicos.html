@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Técnicos Disponibles</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        /* 🎨 Fondo clásico diferente */
+        body {
+            background-color: #e3e6e4; /* Gris claro profesional */
+            color: #333; /* Texto oscuro para mejor contraste */
+        }
+        /* 🎨 Estilo para las tarjetas */
+        .card {
+            background-color: #dfe7ec; /* Azul humo */
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        .card-body {
+            padding: 15px;
+        }
+        .btn-secondary {
+            background-color: #f10f0f;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="mt-3">
+        <h2>🔍 Buscar Tecnicos</h2>
+        <input type="text" id="buscarEmpresa" class="form-control mt-3 mb-4" placeholder="Buscar por empresa..." oninput="filtrarTecnicos()">
+        <input type="text" id="buscarCiudad" class="form-control mt-2 mb-4" placeholder="Buscar por ciudad..." oninput="filtrarTecnicos()">
+    </div>
+    <div class="container">
+        <h1 class="text-primary text-center mt-4">🔧 Lista de Técnicos</h1>
+        <div class="row" id="tecnico-list"></div>
+        <div class="text-center mt-4">
+            <a href="principal.html" class="btn btn-secondary">⬅️ Volver</a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            fetch("obtener_productos.php")
+                .then(response => response.json())
+                .then(data => {
+                    const tecnicoList = document.getElementById("tecnico-list");
+                    tecnicoList.innerHTML = "";
+
+                    if (data.length === 0) {
+                        tecnicoList.innerHTML = "<p class='text-center text-muted'>No hay técnicos registrados.</p>";
+                    } else {
+                        data.filter(item => item.tipo === "Técnico").forEach(tecnico => {
+                            const tecnicoCard = document.createElement("div");
+                            tecnicoCard.classList.add("col-md-4", "mb-3");
+
+                            let fotoHTML = tecnico.foto ? `<img src="${tecnico.foto}" class="card-img-top" alt="Foto de ${tecnico.nombre}">` : "";
+
+                            tecnicoCard.innerHTML = `
+                                <div class="card shadow">
+                                    ${fotoHTML}
+                                    <div class="card-body">
+                                        <h5 class="card-title">👷 ${tecnico.nombre}</h5>
+                                        <p>🏢 <strong>Empresa:</strong> ${tecnico.empresa}</p>
+                                        <p>📞 <strong>Celular:</strong> ${tecnico.celular}</p>
+                                        <p>⏰ <strong>Horarios:</strong> ${tecnico.horarios}</p>
+                                        <p>📍 <strong>Descripción:</strong> ${tecnico.descripcion}</p>
+                                        <p>🎫 <strong>Tarjeta Profesional</strong></p> 
+                                        <a href="agendar_cita.html?tecnico=${tecnico.nombre}" class="btn btn-primary mt-2">📅 Agendar Cita</a>
+                                        <a href="comentarios_tecnico.html?tecnico_id=${tecnico.id}" class="btn btn-warning mt-2">💬 Ver Comentarios (0)</a>
+                                        <a href="formulario_comentario_tecnico.html?tecnico_id=${tecnico.id}" class="btn btn-info mt-2">💬 Comentar</a>
+                                    </div>
+                                </div>
+                            `;
+                            tecnicoList.appendChild(tecnicoCard);
+                        });
+                    }
+                })
+                .catch(error => console.error("Error al cargar técnicos:", error));
+        });
+        let tecnicos = []; // Guardará la lista de técnicos
+
+        document.addEventListener("DOMContentLoaded", function() {
+            fetch("obtener_productos.php")
+                .then(response => response.json())
+                .then(data => {
+                    // Filtrar solo los técnicos y guardarlos en la variable
+                    tecnicos = data.filter(item => item.tipo === "Técnico");
+                    mostrarTecnicos(tecnicos);
+                })
+                .catch(error => console.error("Error al cargar técnicos:", error));
+        });
+
+        function mostrarTecnicos(lista) {
+            const tecnicoList = document.getElementById("tecnico-list");
+            tecnicoList.innerHTML = "";
+        
+            if (lista.length === 0) {
+                tecnicoList.innerHTML = "<p class='text-center text-muted'>No hay técnicos registrados.</p>";
+            } else {
+                lista.forEach(tecnico => {
+                    const tecnicoCard = document.createElement("div");
+                    tecnicoCard.classList.add("col-md-4", "mb-3");
+        
+                    let fotoHTML = tecnico.foto ? `<img src="${tecnico.foto}" class="card-img-top" alt="Foto de ${tecnico.nombre}">` : "";
+                    let tarjetaHTML = tecnico.tarjeta_profesional 
+                        ? `<p>🎫 <strong>Tarjeta Profesional:</strong> ${tecnico.tarjeta_profesional}</p>` 
+                        : `<p class="text-danger">⚠️ No tiene tarjeta profesional registrada</p>`;
+        
+                    tecnicoCard.innerHTML = `
+                        <div class="card shadow">
+                            ${fotoHTML}
+                            <div class="card-body">
+                                <h5 class="card-title">👷 ${tecnico.nombre}</h5>
+                                <p>🏢 <strong>Empresa:</strong> ${tecnico.empresa}</p>
+                                <p>📞 <strong>Celular:</strong> ${tecnico.celular}</p>
+                                <p>📍 <strong>Ciudad:</strong> ${tecnico.ciudad}</p>
+                                <p>⏰ <strong>Horarios:</strong> ${tecnico.horarios}</p>
+                                <p>📍 <strong>Descripción:</strong> ${tecnico.descripcion}</p>
+                                ${tarjetaHTML}
+                                <a href="agendar_cita.html?tecnico=${tecnico.nombre}" class="btn btn-primary mt-2">📅 Agendar Cita</a>
+                                <a href="comentarios_tecnico.html?tecnico_id=${tecnico.id}" class="btn btn-warning mt-2">💬 Ver Comentarios</a>
+                            </div>
+                        </div>
+                    `;
+                    tecnicoList.appendChild(tecnicoCard);
+                });
+            }
+        }
+            
+        function filtrarTecnicos() {
+            let empresa = document.getElementById("buscarEmpresa").value.trim().toLowerCase();
+            let ciudad = document.getElementById("buscarCiudad").value.trim().toLowerCase();
+
+            let filtrados = tecnicos.filter(tecnico => 
+                (empresa === "" || tecnico.empresa.toLowerCase().includes(empresa)) &&
+                (ciudad === "" || tecnico.ciudad.toLowerCase().includes(ciudad))
+            );
+
+            mostrarTecnicos(filtrados);
+        }
+    </script>
+</body>
+</html>
+

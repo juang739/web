@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛠️ Registro Técnico</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #004a99; /* Azul oscuro */
+            color: white;
+            text-align: center;
+        }
+        .container {
+            margin-top: 50px;
+            background: #004a99; /* Azul intermedio */
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.844);
+        }
+        .sticker {
+            font-size: 60px;
+            display: block;
+            margin-bottom: 20px;
+        }
+        .form-control {
+            border-radius: 10px;
+            border: none;
+            padding: 12px;
+        }
+        .btn-custom {
+            background-color: #FFD700; /* Amarillo */
+            color: #00274D; /* Azul oscuro */
+            font-weight: bold;
+            border-radius: 10px;
+            padding: 12px;
+            width: 100%;
+        }
+        .btn-custom:hover {
+            background-color: #FFC107; /* Amarillo más oscuro */
+        }
+        .btn-back {
+            background-color: #dc3545; /* Rojo */
+            color: white;
+            font-weight: bold;
+            border-radius: 10px;
+            padding: 12px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .btn-back:hover {
+            background-color: #c82333; /* Rojo más oscuro */
+        }
+        .alert-custom {
+            display: none;
+            margin-top: 15px;
+            border-radius: 10px;
+            padding: 10px;
+        }
+        .alert-danger {
+            background-color: #ff4d4d; /* Rojo más llamativo */
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <span class="sticker">🛠️👷‍♂️</span>
+        <h2>Registro Técnico</h2>
+        <form id="tecnico-form">
+            <input type="text" name="nombre" class="form-control mt-2" placeholder="👤 Nombre" required>
+            <input type="number" name="tarjeta_profesional" class="form-control mt-2" placeholder="🎓 Tarjeta Profesional" 
+              maxlength="10" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,10)" required>
+           <input type="number" name="cedula" class="form-control mt-2" placeholder="🆔 Cédula" pattern="\d{10}" maxlength="10" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
+            <div id="error-cedula_longitud" class="alert alert-danger alert-custom" style="display: none;">
+                ❌ La cédula debe tener exactamente 10 dígitos.
+            </div>
+            <input type="number" name="celular" class="form-control mt-2" placeholder="📱 Celular" pattern="\d{10}" maxlength="10" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
+            <div id="error-celular" class="alert alert-danger alert-custom" style="display: none;">
+                ❌ El celular debe tener exactamente 10 dígitos.
+            </div>
+            <input type="email" name="correo" class="form-control mt-2" placeholder="📧 Correo" required>
+            <div id="error-correo" class="alert alert-danger alert-custom" style="display: none;">
+                ❌ El correo debe contener "@".
+            </div>
+            <input type="text" name="empresa" class="form-control mt-2" placeholder="🏢 Empresa en la que trabaja" required>
+            <input type="text" name="ciudad" class="form-control mt-2" placeholder="🏙️ Ciudad" required>
+            <input type="text" name="horarios" class="form-control mt-2" placeholder="⏰ Horarios de atención" required>
+            <textarea name="descripcion_lugar" class="form-control mt-2" placeholder="📍 ubicacion de la empresa" required></textarea>
+            <button type="submit" class="btn btn-custom mt-3">✅ Registrar</button>
+        </form>
+
+        <div id="message" class="alert alert-success alert-custom">🎉 Registro exitoso</div>
+        <div id="error-cedula" class="alert alert-danger alert-custom">❌ La cédula ya está registrada.</div>
+
+        <!-- Botón para volver a la página principal -->
+        <a href="Untitled-1.html" class="btn btn-back mt-3">⬅️ Volver</a>
+    </div>
+
+    <script>
+        document.getElementById("tecnico-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+            
+            let formData = new FormData(event.target);
+            formData.append("role", "tecnico"); // Indica que es un técnico
+
+            fetch("save_data.php", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    document.getElementById("message").style.display = "block"; // Muestra mensaje de éxito
+                    document.getElementById("error-cedula").style.display = "none"; // Oculta mensaje de error
+                    event.target.reset(); // Limpia el formulario
+                } else if (data.status === "error") {
+                    document.getElementById("error-cedula").style.display = "block"; // Muestra mensaje de error
+                    document.getElementById("message").style.display = "none"; // Oculta mensaje de éxito
+                }
+            })
+            .catch(error => console.error("Error en el registro:", error));
+        });
+        document.addEventListener("DOMContentLoaded", function () {
+            const cedulaInput = document.querySelector("input[name='cedula']");
+            const celularInput = document.querySelector("input[name='celular']");
+            const correoInput = document.querySelector("input[name='correo']");
+        
+            function validarLongitud(input, errorId) {
+                const errorMensaje = document.getElementById(errorId);
+                if (input.value.length === 10) {
+                    errorMensaje.style.display = "none";
+                } else {
+                    errorMensaje.style.display = "block";
+                }
+            }
+        
+            function validarCorreo() {
+                const errorCorreo = document.getElementById("error-correo");
+                if (correoInput.value.includes("@")) {
+                    errorCorreo.style.display = "none";
+                } else {
+                    errorCorreo.style.display = "block";
+                }
+            }
+        
+            cedulaInput.addEventListener("input", function () {
+                if (this.value.length > 10) {
+                    this.value = this.value.slice(0, 10);
+                }
+                validarLongitud(this, "error-cedula_longitud");
+            });
+        
+            celularInput.addEventListener("input", function () {
+                if (this.value.length > 10) {
+                    this.value = this.value.slice(0, 10);
+                }
+                validarLongitud(this, "error-celular");
+            });
+        
+            correoInput.addEventListener("input", validarCorreo);
+        
+            document.getElementById("vendedor-form").addEventListener("submit", function (event) {
+                event.preventDefault();
+        
+                if (!correoInput.value.includes("@")) {
+                    document.getElementById("error-correo").style.display = "block";
+                    return;
+                }
+        
+                let formData = new FormData(event.target);
+                formData.append("role", "vendedor");
+        
+                fetch("save_data.php", {
+                    method: "POST",
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Respuesta del servidor:", data);
+        
+                    if (data.status === "success") {
+                        document.getElementById("message").style.display = "block";
+                        document.getElementById("error-cedula_longitud").style.display = "none";
+                        document.getElementById("error-correo").style.display = "none";
+                        event.target.reset();
+                    } else if (data.status === "error") {
+                        document.getElementById("error-cedula_longitud").style.display = "block";
+                        document.getElementById("message").style.display = "none";
+                    }
+                })
+                .catch(error => {
+                    console.error("Error en el registro:", error);
+                    document.getElementById("error-cedula").textContent = "❌ Ocurrió un error. Inténtalo de nuevo.";
+                    document.getElementById("error-cedula").style.display = "block";
+                    document.getElementById("message").style.display = "none";
+                });
+            });
+        });
+        document.getElementById("tecnico-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+        
+            let tarjetaProfesional = document.querySelector("input[name='tarjeta_profesional']").value;
+            let errorTarjeta = document.getElementById("error-tarjeta");
+        
+            if (tarjetaProfesional.trim() === "") {
+                errorTarjeta.style.display = "block";
+                return;
+            } else {
+                errorTarjeta.style.display = "none";
+            }
+        
+            let formData = new FormData(event.target);
+            formData.append("role", "tecnico");
+        
+            fetch("save_data.php", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    document.getElementById("message").style.display = "block";
+                    event.target.reset();
+                } else {
+                    console.error("Error en el registro:", data.message);
+                }
+            })
+            .catch(error => console.error("Error en la solicitud:", error));
+        });
+        document.getElementById("tecnico-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+        
+            let ciudadInput = document.querySelector("input[name='ciudad']");
+            let errorCiudad = document.getElementById("error-ciudad");
+        
+            if (ciudadInput.value.trim() === "") {
+                errorCiudad.style.display = "block";
+                errorCiudad.innerText = "La ciudad es obligatoria.";
+                ciudadInput.focus();
+                return;
+            } else {
+                errorCiudad.style.display = "none";
+            }
+        
+            let formData = new FormData(event.target);
+            formData.append("role", "tecnico");
+        
+            fetch("save_data.php", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    document.getElementById("message").style.display = "block";
+                    event.target.reset();
+                } else {
+                    console.error("Error en el registro:", data.message);
+                }
+            })
+            .catch(error => console.error("Error en la solicitud:", error));
+        });
+        
+                         
+    </script>
+</body>
+</html>
